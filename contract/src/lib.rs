@@ -12,6 +12,7 @@ pub struct Contract {
 
 impl Default for Contract {
     // The default trait with which to initialize the contract
+    // 默认的合约状态属性greeting为 Hello
     fn default() -> Self {
         Self {
             greeting: DEFAULT_MESSAGE.to_string(),
@@ -23,11 +24,13 @@ impl Default for Contract {
 #[near_bindgen]
 impl Contract {
     // Public: Returns the stored greeting, defaulting to 'Hello'
+    // view方法，任何人都可以自由查看 
     pub fn get_greeting(&self) -> String {
         return self.greeting.clone();
     }
 
     // Public: Takes a greeting, such as 'howdy', and records it
+    // changable 方法， 修改状态必须账户去签名交易才行
     pub fn set_greeting(&mut self, greeting: String) {
         // Record a log permanently to the blockchain!
         log!("Saving greeting {}", greeting);
