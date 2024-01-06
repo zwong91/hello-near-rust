@@ -1,0 +1,23 @@
+## Anatomy
+- 所有私有方法都被修饰为 private
+
+## Environment
+- 整个合约中正确使用了 predecessor 和 signer
+
+## Storage
+- 每次state增长时，都确保有足够的资金cover
+- 所有集合（如Vector、Map、Tree等）都有一个唯一的ID
+- Cargo.toml `overflow-checks = true` Check for underflow and overflow!
+
+## Actions
+- 在send money时，在合约中留下足够的金额以支付存储成本
+- tracking user s fund, 在返还给用户前 deduct them
+
+
+## Callbacks
+- 所有私有回调都标记为 private
+- 所有的跨合约调用都有一个回调函数，
+ > 用于检查错误并在必要时回滚状态
+ > 用于检查错误并在必要时将资金退还给 predecessor
+- 所有的回调函数都被提供足够的 GAS execute entirely
+- 异步链, 跨合同调用和其回调之间让合约没有留下可利用的状态
