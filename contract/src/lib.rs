@@ -12,6 +12,9 @@ use near_sdk::serde_json::json;
 const DEFAULT_MESSAGE: &str = "Hello";
 
 //  Collections contract's attributes (state), Always prefer SDK collections over native 
+//  collections 被设计为将数据分割成chunk, defer reading and writing to the store until needed
+// near_sdk::collections 将迁移到 near_sdk::store 并更新API, 在 near-sdk 上启用 unstable 功能使用
+// https://docs.rs/near-sdk/latest/near_sdk/collections/index.html
 /*
 vector: Vector::new(b"vec-uid-1".to_vec()),
 map: LookupMap::new(b"map-uid-1".to_vec()),
@@ -30,6 +33,7 @@ const MIN_STORAGE: Balance = 100_000_000_000_000_000_000_000; //0.1 N
 // Internal Structures 包括非bindings的内部结构和 bindings的合约结构
 // NEAR Bindgen bindings装饰器  Define the contract structure 合约的结构，Borsh 序列化状态存储， json 序列化作为方法的输入输出
 // NEAR Bindgen decorator/macro 将代码转换为有效的NEAR合约
+// 每当调用函数时，状态将被加载和反序列化，保持加载的数据量尽可能小是很重要的
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct Contract {
@@ -61,7 +65,7 @@ impl Contract {
     //init默认是public的, 必须修饰为 private 或在部署时批量调用初始化
     #[init]
     #[private] // Public - but only callable by env::current_account_id()
-    pub fn init(beneficiary: AccountId) -> Self {
+    pub fn new(beneficiary: AccountId) -> Self {
         Self {
             greeting: "hala".to_string(),
             beneficiary,
@@ -121,7 +125,7 @@ impl Contract {
         /* public, panics when caller is not the contract's account */ 
     }
 
-    // call的时候 附加资金attaches money, 有转账的方法
+    // call的时候 附加资金attaches money, 允许tokens在方法调用时进行转移
     #[payable]
     pub fn deposit_and_stake(&mut self ){
         // this method can receive money from the user
